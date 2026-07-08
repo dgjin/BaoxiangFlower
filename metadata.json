@@ -1,0 +1,6 @@
+{
+  "name": "宝相花流光美学动效",
+  "description": "基于传统美学设计的交互式宝相花流光动效工坊，融合金色线条勾勒、动态流光渐变与禅意交互体验。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cinzel:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Playfair Display", "Cinzel", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+  --color-gold-accent: #D4AF37;
+}
+
+@keyframes draw-lines {
+  0% {
+    stroke-dasharray: 1200;
+    stroke-dashoffset: 1200;
+  }
+  100% {
+    stroke-dasharray: 1200;
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-draw {
+  animation: draw-lines 3.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Custom scrollbar to keep layout premium */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.2);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.4);
+}
+
+/* Subtle glowing pulse */
+@keyframes gold-pulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.25);
+  }
+}
+.gold-glowing {
+  animation: gold-pulse 3.5s infinite ease-in-out;
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin-slow {
+  animation: spin-slow 25s linear infinite;
+}
+
+/* Natural organic wind/breeze swaying animation for petals */
+@keyframes petal-breeze {
+  0% {
+    transform: rotate(0deg) translate(0px, 0px);
+  }
+  15% {
+    transform: rotate(0.35deg) translate(0.15px, -0.1px);
+  }
+  32% {
+    transform: rotate(-0.3deg) translate(-0.1px, 0.15px);
+  }
+  48% {
+    transform: rotate(0.4deg) translate(0.2px, -0.15px);
+  }
+  65% {
+    transform: rotate(-0.25deg) translate(-0.15px, 0.1px);
+  }
+  82% {
+    transform: rotate(0.3deg) translate(0.1px, -0.1px);
+  }
+  100% {
+    transform: rotate(0deg) translate(0px, 0px);
+  }
+}
+
+.animate-petal-breeze {
+  transform-origin: 0px 0px;
+  animation: petal-breeze 6s cubic-bezier(0.37, 0, 0.63, 1) infinite;
+}
+
+/* Zaojing (Caisson Ceiling) geometric structure animations */
+@keyframes zaojing-spin-cw {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes zaojing-spin-ccw {
+  0% { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes zaojing-breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.03);
+    opacity: 0.6;
+  }
+}
+
+.animate-zaojing-cw {
+  transform-origin: 0px 0px;
+  animation: zaojing-spin-cw 80s linear infinite;
+}
+
+.animate-zaojing-ccw {
+  transform-origin: 0px 0px;
+  animation: zaojing-spin-ccw 90s linear infinite;
+}
+
+.animate-zaojing-breathe {
+  transform-origin: 0px 0px;
+  animation: zaojing-breathe 10s ease-in-out infinite;
+}
+
+
