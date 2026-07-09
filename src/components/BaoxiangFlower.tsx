@@ -555,7 +555,7 @@ export default function BaoxiangFlower({
   return (
     <div
       ref={containerRef}
-      className="relative w-full aspect-square max-w-[500px] mx-auto select-none overflow-hidden rounded-full flex items-center justify-center bg-radial from-[rgba(26,18,22,0.4)] to-transparent"
+      className={`relative w-full aspect-square max-w-[500px] mx-auto select-none overflow-hidden flex items-center justify-center bg-radial from-[rgba(26,18,22,0.4)] to-transparent ${config.showDecorRing ? '' : 'rounded-full'}`}
       onMouseMove={handleMouseMove}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
