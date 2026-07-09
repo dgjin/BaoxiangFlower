@@ -1,6 +1,15 @@
 import { NOTE_FREQUENCIES } from '../data/presets';
 
 let audioCtx: AudioContext | null = null;
+let masterVolume: number = 0.35; // 0.0 - 1.0
+
+export function setChimeVolume(volume: number) {
+  masterVolume = Math.max(0, Math.min(1, volume));
+}
+
+export function getChimeVolume(): number {
+  return masterVolume;
+}
 
 function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
@@ -22,6 +31,7 @@ export function playChime(note: string) {
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
+    if (masterVolume <= 0) return;
 
     const frequency = NOTE_FREQUENCIES[note] || 261.63;
     const now = ctx.currentTime;
@@ -29,7 +39,7 @@ export function playChime(note: string) {
     // 1. Create a master gain for the note
     const noteGain = ctx.createGain();
     noteGain.gain.setValueAtTime(0, now);
-    noteGain.gain.linearRampToValueAtTime(0.35, now + 0.01); // Quick attack
+    noteGain.gain.linearRampToValueAtTime(0.35 * masterVolume, now + 0.01); // Quick attack
     noteGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.5); // Smooth long decay
 
     // 2. Fundamental Frequency (Sine wave for pure depth)

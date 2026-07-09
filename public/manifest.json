@@ -1,0 +1,18 @@
+{
+  "name": "宝相花流光美学工坊",
+  "short_name": "宝相花",
+  "description": "基于东方传统重彩美学设计的交互式艺术工坊",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23D4AF37' opacity='0.9'/><circle cx='50' cy='50' r='25' fill='%23AA7C11'/><circle cx='50' cy='50' r='8' fill='%23FFF'/></svg>",
+      "sizes": "100x100",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

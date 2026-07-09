@@ -13,13 +13,17 @@ import {
   Eye,
   Sliders,
   Feather,
-  Flower2
+  Flower2,
+  Volume2,
+  Undo2
 } from 'lucide-react';
 
 interface ControlPanelProps {
   config: FlowerConfig;
   onChange: (newConfig: FlowerConfig) => void;
   onTriggerDrawing: () => void;
+  onUndo?: () => void;
+  hasHistory?: boolean;
   isMobile?: boolean;
 }
 
@@ -27,6 +31,8 @@ export default function ControlPanel({
   config,
   onChange,
   onTriggerDrawing,
+  onUndo,
+  hasHistory = false,
   isMobile = false,
 }: ControlPanelProps) {
   
@@ -90,6 +96,7 @@ export default function ControlPanel({
       outlineWidth: 1.8,
       particleDensity: 5,
       renderingMode: 'both',
+      showDecorRing: false,
       customColors: {
         outer: '',
         inner: '',
@@ -102,7 +109,7 @@ export default function ControlPanel({
     <div 
       id="control-panel" 
       className={`bg-[#09090b]/90 backdrop-blur-xl border border-[#D4AF37]/25 rounded-2xl shadow-2xl text-gray-200 transition-all ${
-        isMobile ? 'p-4 space-y-4' : 'p-6 space-y-6'
+        isMobile ? 'p-4 space-y-5 rounded-[20px]' : 'p-6 space-y-6'
       }`}
     >
       
@@ -110,9 +117,9 @@ export default function ControlPanel({
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-[#D4AF37] font-medium font-serif">
           <Palette className="w-5 h-5" id="icon-palette" />
-          <span className="text-base tracking-wider font-semibold">东方历史美学色调</span>
+          <span className={`tracking-wider font-semibold ${isMobile ? 'text-[15px]' : 'text-base'}`}>东方历史美学色调</span>
         </div>
-        <p className="text-xs text-gray-400">选择中国传统美学断代或壁画色彩作为视觉底蕴：</p>
+        {!isMobile && <p className="text-xs text-gray-400">选择中国传统美学断代或壁画色彩作为视觉底蕴：</p>}
         
         <div className="grid grid-cols-2 gap-2 pt-1">
           {HISTORICAL_PRESETS.map((p) => {
@@ -121,7 +128,9 @@ export default function ControlPanel({
               <button
                 key={p.id}
                 onClick={() => handlePresetSelect(p.id)}
-                className={`flex flex-col text-left p-3 rounded-xl border transition-all duration-300 relative overflow-hidden cursor-pointer ${
+                className={`flex flex-col text-left rounded-xl border transition-all duration-300 relative overflow-hidden cursor-pointer ios-tap ${
+                  isMobile ? 'p-2.5' : 'p-3'
+                } ${
                   active 
                     ? 'border-[#D4AF37]/65 bg-gradient-to-br from-[#D4AF37]/15 to-red-500/10 shadow-[0_0_15px_rgba(212,175,55,0.2)]' 
                     : 'border-[#D4AF37]/10 bg-[#050505]/40 hover:bg-[#D4AF37]/5 hover:border-[#D4AF37]/20'
@@ -154,9 +163,9 @@ export default function ControlPanel({
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-[#D4AF37] font-medium font-serif">
           <Flower2 className="w-5 h-5 text-[#D4AF37]" id="icon-flower-type" />
-          <span className="text-base tracking-wider font-semibold">传世宝相花型规制</span>
+          <span className={`tracking-wider font-semibold ${isMobile ? 'text-[15px]' : 'text-base'}`}>传世宝相花型规制</span>
         </div>
-        <p className="text-xs text-gray-400">选择大唐与敦煌造像壁画中的经典花瓣几何轮廓：</p>
+        {!isMobile && <p className="text-xs text-gray-400">选择大唐与敦煌造像壁画中的经典花瓣几何轮廓：</p>}
         
         <div className="grid grid-cols-2 gap-2 pt-1">
           {[
@@ -173,7 +182,9 @@ export default function ControlPanel({
                   updateConfig('flowerType', type.id);
                   onTriggerDrawing();
                 }}
-                className={`flex flex-col text-left p-2.5 rounded-xl border transition-all duration-300 relative overflow-hidden cursor-pointer ${
+                className={`flex flex-col text-left rounded-xl border transition-all duration-300 relative overflow-hidden cursor-pointer ios-tap ${
+                  isMobile ? 'p-2' : 'p-2.5'
+                } ${
                   active 
                     ? 'border-[#D4AF37]/65 bg-gradient-to-br from-[#D4AF37]/15 to-amber-500/10 shadow-[0_0_15px_rgba(212,175,55,0.2)]' 
                     : 'border-[#D4AF37]/10 bg-[#050505]/40 hover:bg-[#D4AF37]/5 hover:border-[#D4AF37]/20'
@@ -201,29 +212,25 @@ export default function ControlPanel({
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-[#D4AF37] font-medium font-serif">
           <Sliders className="w-5 h-5" id="icon-sliders" />
-          <span className="text-base tracking-wider font-semibold">流光与构图控制</span>
+          <span className={`tracking-wider font-semibold ${isMobile ? 'text-[15px]' : 'text-base'}`}>流光与构图控制</span>
         </div>
 
         {/* Structure & Grid */}
         <div className={`bg-[#050505]/60 border border-[#D4AF37]/15 rounded-xl transition-all ${
-          isMobile ? 'p-3 space-y-2' : 'p-4 space-y-3'
+          isMobile ? 'p-3.5 space-y-3' : 'p-4 space-y-3'
         }`}>
-          {/* Petal Count */}
-          <div className="space-y-1.5">
+          {/* Petal Count - iOS Segmented Style */}
+          <div className="space-y-2">
             <div className="flex justify-between text-xs text-gray-300">
-              <span className="flex items-center gap-1.5"><Layers className="w-3.5 h-3.5" /> 花瓣层数 (对称性)</span>
+              <span className="flex items-center gap-1.5"><Layers className="w-3.5 h-3.5" /> 花瓣层数</span>
               <span className="font-mono text-[#D4AF37] font-bold">{config.petalCount} 瓣</span>
             </div>
-            <div className="flex gap-1.5">
+            <div className="ios-segmented">
               {[6, 8, 10, 12, 16].map((count) => (
                 <button
                   key={count}
                   onClick={() => updateConfig('petalCount', count)}
-                  className={`flex-1 py-1 rounded-md text-xs font-mono font-semibold border transition-all cursor-pointer ${
-                    config.petalCount === count
-                      ? 'border-[#D4AF37] bg-[#D4AF37]/20 text-[#D4AF37]'
-                      : 'border-[#D4AF37]/10 bg-[#050505]/40 hover:bg-[#D4AF37]/5 text-gray-400'
-                  }`}
+                  className={config.petalCount === count ? 'active' : ''}
                 >
                   {count}
                 </button>
@@ -231,41 +238,54 @@ export default function ControlPanel({
             </div>
           </div>
 
-          {/* Rendering Modes */}
-          <div className="space-y-1.5 pt-1">
+          {/* Rendering Modes - iOS Segmented Style */}
+          <div className="space-y-2 pt-1">
             <div className="flex justify-between text-xs text-gray-300">
               <span className="flex items-center gap-1.5"><Eye className="w-3.5 h-3.5" /> 视觉渲染模式</span>
             </div>
-            <div className="grid grid-cols-3 gap-1.5">
+            <div className="ios-segmented">
               {[
                 { id: 'both', label: '流光泥金' },
                 { id: 'gold-only', label: '纯金线描' },
-                { id: 'gradient-only', label: '无界流光' },
-              ].map((mode) => (
-                <button
-                  key={mode.id}
-                  onClick={() => updateConfig('renderingMode', mode.id)}
-                  className={`py-1 rounded-md text-[10px] font-semibold border transition-all cursor-pointer ${
-                    config.renderingMode === mode.id
-                      ? 'border-[#D4AF37] bg-[#D4AF37]/20 text-[#D4AF37]'
-                      : 'border-[#D4AF37]/10 bg-[#050505]/40 hover:bg-[#D4AF37]/5 text-gray-400'
-                  }`}
-                >
-                  {mode.label}
-                </button>
-              ))}
-            </div>
+              { id: 'gradient-only', label: '无界流光' },
+            ].map((mode) => (
+              <button
+                key={mode.id}
+                onClick={() => updateConfig('renderingMode', mode.id)}
+                className={config.renderingMode === mode.id ? 'active' : ''}
+              >
+                {mode.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Fine Tuning Sliders */}
+        {/* Decorative Circular Ring Toggle */}
+        <div className="flex items-center justify-between pt-1">
+          <span className="text-xs text-gray-300 flex items-center gap-1.5"><Layers className="w-3.5 h-3.5 text-[#2a9d8f]" /> 装饰圆环</span>
+          <button
+            onClick={() => updateConfig('showDecorRing', !config.showDecorRing)}
+            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+              config.showDecorRing ? 'bg-[#2a9d8f]' : 'bg-gray-600'
+            }`}
+          >
+            <span
+              className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
+                config.showDecorRing ? 'translate-x-4.5' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
+      </div>
+
+        {/* Fine Tuning Sliders - iOS Style */}
         <div className={`bg-[#050505]/60 border border-[#D4AF37]/15 rounded-xl transition-all ${
-          isMobile ? 'p-3 space-y-3' : 'p-4 space-y-4'
+          isMobile ? 'p-3.5 space-y-4' : 'p-4 space-y-4'
         }`}>
           {/* Gradient Flow Speed */}
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs text-gray-300">
-              <span className="flex items-center gap-1.5"><Flame className="w-3.5 h-3.5 text-orange-400" /> 流光溢彩速度 (Gradient Flow)</span>
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs">
+              <span className="flex items-center gap-1.5 text-gray-300"><Flame className="w-3.5 h-3.5 text-orange-400" /> 流光溢彩速度</span>
               <span className="font-mono text-[#D4AF37] font-bold">{config.flowSpeed}</span>
             </div>
             <input
@@ -274,14 +294,14 @@ export default function ControlPanel({
               max="10"
               value={config.flowSpeed}
               onChange={(e) => updateConfig('flowSpeed', parseInt(e.target.value))}
-              className="w-full accent-[#D4AF37] bg-black/40 h-1.5 rounded-lg appearance-none cursor-pointer"
+              className="ios-slider gold"
             />
           </div>
 
           {/* Rotation Speed */}
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs text-gray-300">
-              <span className="flex items-center gap-1.5"><RotateCw className="w-3.5 h-3.5 text-blue-400 animate-spin-slow" /> 宝相法轮转速 (Rotation)</span>
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs">
+              <span className="flex items-center gap-1.5 text-gray-300"><RotateCw className="w-3.5 h-3.5 text-blue-400 animate-spin-slow" /> 宝相法轮转速</span>
               <span className="font-mono text-[#D4AF37] font-bold">{config.rotationSpeed}</span>
             </div>
             <input
@@ -290,14 +310,14 @@ export default function ControlPanel({
               max="10"
               value={config.rotationSpeed}
               onChange={(e) => updateConfig('rotationSpeed', parseInt(e.target.value))}
-              className="w-full accent-[#D4AF37] bg-black/40 h-1.5 rounded-lg appearance-none cursor-pointer"
+              className="ios-slider gold"
             />
           </div>
 
           {/* Breathing Pulse Speed */}
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs text-gray-300">
-              <span className="flex items-center gap-1.5"><Feather className="w-3.5 h-3.5 text-green-400" /> 生生不息律动 (Breathing)</span>
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs">
+              <span className="flex items-center gap-1.5 text-gray-300"><Feather className="w-3.5 h-3.5 text-green-400" /> 生生不息律动</span>
               <span className="font-mono text-[#D4AF37] font-bold">{config.pulseSpeed}</span>
             </div>
             <input
@@ -306,14 +326,14 @@ export default function ControlPanel({
               max="10"
               value={config.pulseSpeed}
               onChange={(e) => updateConfig('pulseSpeed', parseInt(e.target.value))}
-              className="w-full accent-[#D4AF37] bg-black/40 h-1.5 rounded-lg appearance-none cursor-pointer"
+              className="ios-slider gold"
             />
           </div>
 
           {/* Stroke Width */}
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs text-gray-300">
-              <span className="flex items-center gap-1.5"><Layers className="w-3.5 h-3.5 text-yellow-500" /> 金线描边粗细 (Outline)</span>
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs">
+              <span className="flex items-center gap-1.5 text-gray-300"><Layers className="w-3.5 h-3.5 text-yellow-500" /> 金线描边粗细</span>
               <span className="font-mono text-[#D4AF37] font-bold">{config.outlineWidth}px</span>
             </div>
             <input
@@ -323,14 +343,14 @@ export default function ControlPanel({
               step="0.2"
               value={config.outlineWidth}
               onChange={(e) => updateConfig('outlineWidth', parseFloat(e.target.value))}
-              className="w-full accent-[#D4AF37] bg-black/40 h-1.5 rounded-lg appearance-none cursor-pointer"
+              className="ios-slider gold"
             />
           </div>
 
           {/* Glow Intensity */}
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs text-gray-300">
-              <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-yellow-300" /> 佛光晕染强度 (Glow Effect)</span>
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs">
+              <span className="flex items-center gap-1.5 text-gray-300"><Sparkles className="w-3.5 h-3.5 text-yellow-300" /> 佛光晕染强度</span>
               <span className="font-mono text-[#D4AF37] font-bold">{config.glowIntensity}</span>
             </div>
             <input
@@ -339,7 +359,7 @@ export default function ControlPanel({
               max="10"
               value={config.glowIntensity}
               onChange={(e) => updateConfig('glowIntensity', parseInt(e.target.value))}
-              className="w-full accent-[#D4AF37] bg-black/40 h-1.5 rounded-lg appearance-none cursor-pointer"
+              className="ios-slider gold"
             />
           </div>
         </div>
@@ -352,35 +372,35 @@ export default function ControlPanel({
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-[#D4AF37] font-medium font-serif">
             <Palette className="w-5 h-5" id="icon-custom-palette" />
-            <span className="text-base tracking-wider font-semibold">自定义矿颜微调</span>
+            <span className={`tracking-wider font-semibold ${isMobile ? 'text-[15px]' : 'text-base'}`}>自定义矿颜微调</span>
           </div>
-          <p className="text-xs text-gray-400">修改特定花层的矿物颜色实现个性化配色：</p>
-          <div className="grid grid-cols-3 gap-3 bg-[#050505]/60 border border-[#D4AF37]/15 rounded-xl p-3">
-            <div className="flex flex-col items-center gap-1">
+          {!isMobile && <p className="text-xs text-gray-400">修改特定花层的矿物颜色实现个性化配色：</p>}
+          <div className="grid grid-cols-3 gap-3 bg-[#050505]/60 border border-[#D4AF37]/15 rounded-xl p-3.5">
+            <div className="flex flex-col items-center gap-1.5">
               <span className="text-[10px] text-gray-400">外瓣颜色</span>
               <input 
                 type="color" 
                 value={config.customColors.outer || currentPreset.colors.outer}
                 onChange={(e) => updateCustomColor('outer', e.target.value)}
-                className="w-8 h-8 rounded-md bg-transparent border-none cursor-pointer"
+                className={`rounded-full border-2 border-[#D4AF37]/20 cursor-pointer ${isMobile ? 'w-10 h-10' : 'w-8 h-8'}`}
               />
             </div>
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-col items-center gap-1.5">
               <span className="text-[10px] text-gray-400">内瓣颜色</span>
               <input 
                 type="color" 
                 value={config.customColors.inner || currentPreset.colors.inner}
                 onChange={(e) => updateCustomColor('inner', e.target.value)}
-                className="w-8 h-8 rounded-md bg-transparent border-none cursor-pointer"
+                className={`rounded-full border-2 border-[#D4AF37]/20 cursor-pointer ${isMobile ? 'w-10 h-10' : 'w-8 h-8'}`}
               />
             </div>
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-col items-center gap-1.5">
               <span className="text-[10px] text-gray-400">花心颜色</span>
               <input 
                 type="color" 
                 value={config.customColors.center || currentPreset.colors.center}
                 onChange={(e) => updateCustomColor('center', e.target.value)}
-                className="w-8 h-8 rounded-md bg-transparent border-none cursor-pointer"
+                className={`rounded-full border-2 border-[#D4AF37]/20 cursor-pointer ${isMobile ? 'w-10 h-10' : 'w-8 h-8'}`}
               />
             </div>
           </div>
@@ -389,32 +409,49 @@ export default function ControlPanel({
 
       {/* SECTION 4: Interactive Sound & Sparks */}
       <div className={`bg-[#050505]/60 border border-[#D4AF37]/15 rounded-xl transition-all ${
-        isMobile ? 'p-3 space-y-3' : 'p-4 space-y-4'
+        isMobile ? 'p-3.5 space-y-3.5' : 'p-4 space-y-4'
       }`}>
-        {/* Sound Toggle */}
+        {/* Sound Toggle - iOS Switch Style */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Music className="w-4 h-4 text-[#D4AF37]" />
+            <Music className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'} text-[#D4AF37]`} />
             <div className="flex flex-col">
-              <span className="text-xs font-medium text-gray-200">禅意五音敲击 (Chime)</span>
-              <span className="text-[10px] text-gray-400">触碰或悬停花瓣时弹奏古琴金铃</span>
+              <span className={`font-medium text-gray-200 ${isMobile ? 'text-[13px]' : 'text-xs'}`}>禅意五音敲击</span>
+              {!isMobile && <span className="text-[10px] text-gray-400">触碰或悬停花瓣时弹奏古琴金铃</span>}
             </div>
           </div>
-          <label className="relative inline-flex items-center cursor-pointer">
+          <label className="ios-switch">
             <input 
               type="checkbox" 
               checked={config.chimeEnabled}
               onChange={(e) => updateConfig('chimeEnabled', e.target.checked)}
-              className="sr-only peer"
             />
-            <div className="w-9 h-5 bg-black/40 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-gray-300 after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#D4AF37]"></div>
+            <span className="slider"></span>
           </label>
         </div>
 
+        {/* Chime Volume Slider */}
+        {config.chimeEnabled && (
+          <div className="space-y-2 pt-1">
+            <div className="flex justify-between text-xs text-gray-300">
+              <span className="flex items-center gap-1.5"><Volume2 className="w-3.5 h-3.5 text-[#D4AF37]" /> 禅音音量</span>
+              <span className="font-mono text-[#D4AF37] font-bold">{config.chimeVolume}%</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={config.chimeVolume}
+              onChange={(e) => updateConfig('chimeVolume', parseInt(e.target.value))}
+              className="ios-slider gold"
+            />
+          </div>
+        )}
+
         {/* Sparks Density Slider */}
-        <div className="space-y-1.5 pt-1">
+        <div className="space-y-2 pt-1">
           <div className="flex justify-between text-xs text-gray-300">
-            <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" /> 悬停金沙尘埃 (Sparkles)</span>
+            <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" /> 金沙尘埃密度</span>
             <span className="font-mono text-[#D4AF37] font-bold">{config.particleDensity}</span>
           </div>
           <input
@@ -423,29 +460,33 @@ export default function ControlPanel({
             max="10"
             value={config.particleDensity}
             onChange={(e) => updateConfig('particleDensity', parseInt(e.target.value))}
-            className="w-full accent-[#D4AF37] bg-black/40 h-1 rounded-lg appearance-none cursor-pointer"
+            className="ios-slider gold"
           />
         </div>
       </div>
 
       {/* ACTION TRIGGERS */}
-      <div className="grid grid-cols-2 gap-3 pt-2">
+      <div className={`${isMobile ? 'flex flex-col gap-2.5' : 'grid grid-cols-2 gap-3'} pt-2`}>
         <button
           onClick={onTriggerDrawing}
-          className={`px-4 bg-[#D4AF37] hover:bg-[#cfa82e] active:scale-95 text-black font-semibold text-xs tracking-wider rounded-xl transition-all shadow-[0_4px_12px_rgba(212,175,55,0.25)] flex items-center justify-center gap-1.5 cursor-pointer ${
-            isMobile ? 'py-3' : 'py-2.5'
-          }`}
+          className={`ios-btn-primary flex items-center justify-center gap-1.5 ${isMobile ? 'text-sm' : 'text-xs py-2.5'}`}
         >
           <Feather className="w-3.5 h-3.5" /> 重新金线勾勒
         </button>
         <button
           onClick={handleRandomize}
-          className={`px-4 bg-[#050505]/50 hover:bg-[#D4AF37]/10 active:scale-95 border border-[#D4AF37]/20 text-gray-200 font-semibold text-xs tracking-wider rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-            isMobile ? 'py-3' : 'py-2.5'
-          }`}
+          className={`ios-btn-secondary flex items-center justify-center gap-1.5 ${isMobile ? 'text-sm' : 'text-xs py-2.5'}`}
         >
           <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" /> 妙笔随机配色
         </button>
+        {onUndo && hasHistory && (
+          <button
+            onClick={onUndo}
+            className={`ios-btn-secondary flex items-center justify-center gap-1.5 ${isMobile ? 'text-sm' : 'text-xs py-2.5 col-span-2'}`}
+          >
+            <Undo2 className="w-3.5 h-3.5" /> 撤销上一步
+          </button>
+        )}
       </div>
 
       <div className="text-center pt-1">

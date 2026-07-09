@@ -79,6 +79,11 @@ export default function BaoxiangFlower({
   const [activeInnerPetals, setActiveInnerPetals] = useState<Record<number, number>>({});
   const rippleIdCounter = useRef<number>(0);
 
+  // Pinch-to-zoom state
+  const [pinchScale, setPinchScale] = useState(1);
+  const initialPinchDistance = useRef<number>(0);
+  const initialPinchScale = useRef<number>(1);
+
   // Active color choices (allowing custom over preset)
   const outerColor = config.renderingMode === 'gold-only' ? 'transparent' : (config.customColors.outer || presetColors.outer);
   const innerColor = config.renderingMode === 'gold-only' ? 'transparent' : (config.customColors.inner || presetColors.inner);
@@ -88,13 +93,28 @@ export default function BaoxiangFlower({
   const paths = FLOWER_SHAPES[config.flowerType] || FLOWER_SHAPES.classic;
 
   // 1. requestAnimationFrame for continuous animations (gradient flow, rotation, breathing pulse)
+  // Pauses when page is not visible to save battery/CPU
   useEffect(() => {
     let animId: number;
     let localRotation = 0;
     let pulseTime = 0;
     let localAngle = 0;
+    let isPageVisible = true;
+
+    const handleVisibility = () => {
+      isPageVisible = document.visibilityState === 'visible';
+      if (isPageVisible && !animId) {
+        animId = requestAnimationFrame(animate);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
 
     const animate = () => {
+      if (!isPageVisible) {
+        animId = 0;
+        return;
+      }
+
       // Rotate the gradients inside petals (Flowing Radiance)
       if (config.flowSpeed > 0) {
         localAngle = (localAngle + config.flowSpeed * 0.18) % 360;
@@ -121,10 +141,13 @@ export default function BaoxiangFlower({
     };
 
     animId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animId);
+    return () => {
+      cancelAnimationFrame(animId);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, [config.flowSpeed, config.rotationSpeed, config.pulseSpeed]);
 
-  // 2. Canvas particle simulation
+  // 2. Canvas particle simulation (radiating light beams from center, like the reference animation)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -132,94 +155,212 @@ export default function BaoxiangFlower({
     if (!ctx) return;
 
     let animId: number;
+    let isPageVisible = true;
+
+    const handleVisibility = () => {
+      isPageVisible = document.visibilityState === 'visible';
+      if (isPageVisible && !animId) {
+        animId = requestAnimationFrame(updateParticles);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    // Radiating beams and star particles from the center flower
+    const beams: Array<{
+      id: number;
+      x: number;
+      y: number;
+      angle: number;
+      speed: number;
+      length: number;
+      width: number;
+      life: number;
+      maxLife: number;
+      color: string;
+      type: 'beam' | 'star' | 'dot';
+      size: number;
+      wobble: number;
+    }> = [];
+
+    const centerX = () => canvas.width / 2;
+    const centerY = () => canvas.height / 2;
+
+    const drawBeam = (b: typeof beams[0]) => {
+      const alpha = b.life / b.maxLife;
+      const tailX = b.x - Math.cos(b.angle) * b.length * (1 - alpha * 0.3);
+      const tailY = b.y - Math.sin(b.angle) * b.length * (1 - alpha * 0.3);
+
+      const grad = ctx.createLinearGradient(tailX, tailY, b.x, b.y);
+      grad.addColorStop(0, `rgba(255, 255, 255, 0)`);
+      grad.addColorStop(0.4, `rgba(255, 242, 163, ${alpha * 0.5})`);
+      grad.addColorStop(1, `rgba(255, 255, 255, ${alpha * 0.9})`);
+
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = b.width;
+      ctx.lineCap = 'round';
+      ctx.shadowBlur = b.width * 4;
+      ctx.shadowColor = b.color;
+      ctx.beginPath();
+      ctx.moveTo(tailX, tailY);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+      ctx.restore();
+    };
+
+    const drawStar = (b: typeof beams[0]) => {
+      const alpha = b.life / b.maxLife;
+      const r = b.size;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = b.color;
+      ctx.shadowBlur = r * 3;
+      ctx.shadowColor = b.color;
+      ctx.translate(b.x, b.y);
+      ctx.rotate(b.wobble);
+      ctx.beginPath();
+      for (let i = 0; i < 4; i++) {
+        const a = (i * Math.PI) / 2;
+        ctx.moveTo(b.x, b.y - r);
+        ctx.quadraticCurveTo(b.x, b.y, b.x + r, b.y);
+        ctx.quadraticCurveTo(b.x, b.y, b.x, b.y + r);
+        ctx.quadraticCurveTo(b.x, b.y, b.x - r, b.y);
+        ctx.quadraticCurveTo(b.x, b.y, b.x, b.y - r);
+      }
+      ctx.fill();
+      ctx.restore();
+    };
+
+    const drawDot = (b: typeof beams[0]) => {
+      const alpha = b.life / b.maxLife;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = b.color;
+      ctx.shadowBlur = b.size * 2.5;
+      ctx.shadowColor = b.color;
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    };
+
+    const spawnBeam = () => {
+      const angle = Math.random() * Math.PI * 2;
+      const innerRadius = Math.random() * 60 + 40; // start near the flower edge
+      const speed = Math.random() * 2.5 + 1.5;
+      const colors = ['#FFF2A3', '#D4AF37', '#FFFFFF', '#FFE066', '#E8E8E8'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      beams.push({
+        id: particleIdCounter.current++,
+        x: centerX() + Math.cos(angle) * innerRadius,
+        y: centerY() + Math.sin(angle) * innerRadius,
+        angle,
+        speed,
+        length: Math.random() * 120 + 80,
+        width: Math.random() * 1.2 + 0.3,
+        life: Math.floor(Math.random() * 60 + 60),
+        maxLife: 120,
+        color,
+        type: 'beam',
+        size: 0,
+        wobble: Math.random() * Math.PI,
+      });
+    };
+
+    const spawnStar = () => {
+      const angle = Math.random() * Math.PI * 2;
+      const innerRadius = Math.random() * 80 + 30;
+      const speed = Math.random() * 1.2 + 0.6;
+      const colors = ['#FFFFFF', '#FFF2A3', '#FFD700', '#E8E8E8'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      beams.push({
+        id: particleIdCounter.current++,
+        x: centerX() + Math.cos(angle) * innerRadius,
+        y: centerY() + Math.sin(angle) * innerRadius,
+        angle,
+        speed,
+        length: 0,
+        width: 0,
+        life: Math.floor(Math.random() * 80 + 50),
+        maxLife: 130,
+        color,
+        type: 'star',
+        size: Math.random() * 2.5 + 1,
+        wobble: Math.random() * Math.PI * 2,
+      });
+    };
+
+    const spawnDot = () => {
+      const angle = Math.random() * Math.PI * 2;
+      const innerRadius = Math.random() * 120 + 40;
+      const speed = Math.random() * 0.8 + 0.3;
+      const colors = ['#FFFFFF', '#FFF2A3', '#F0F0F0'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      beams.push({
+        id: particleIdCounter.current++,
+        x: centerX() + Math.cos(angle) * innerRadius,
+        y: centerY() + Math.sin(angle) * innerRadius,
+        angle,
+        speed,
+        length: 0,
+        width: 0,
+        life: Math.floor(Math.random() * 100 + 60),
+        maxLife: 160,
+        color,
+        type: 'dot',
+        size: Math.random() * 1.5 + 0.5,
+        wobble: 0,
+      });
+    };
 
     const updateParticles = () => {
-      // Clear canvas
+      if (!isPageVisible) {
+        animId = 0;
+        return;
+      }
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const particles = particlesRef.current;
       // performance guard: cap maximum concurrent particles on mobile to maintain 60 FPS
-      if (isMobile && particles.length > 35) {
-        particles.splice(0, particles.length - 35);
+      const maxParticles = isMobile ? 45 : 120;
+      if (beams.length > maxParticles) {
+        beams.splice(0, beams.length - maxParticles);
       }
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.life -= 1;
 
-        // Apply velocities and force field toward swirling motion
-        p.x += p.vx;
-        p.y += p.vy;
+      for (let i = beams.length - 1; i >= 0; i--) {
+        const b = beams[i];
+        b.life -= 1;
 
-        // Apply visual air resistance and swirl orbit
-        const dx = p.x - canvas.width / 2;
-        const dy = p.y - canvas.height / 2;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist > 5) {
-          // Add small orbital force
-          const orbitForce = 0.015;
-          p.vx += (-dy / dist) * orbitForce;
-          p.vy += (dx / dist) * orbitForce;
-        }
+        // Move outward along the angle
+        b.x += Math.cos(b.angle) * b.speed;
+        b.y += Math.sin(b.angle) * b.speed;
+        b.wobble += 0.02;
 
-        p.vx *= 0.98;
-        p.vy *= 0.98;
-
-        p.alpha = Math.max(0, p.life / p.maxLife);
-
-        if (p.life <= 0) {
-          particles.splice(i, 1);
+        if (b.life <= 0) {
+          beams.splice(i, 1);
           continue;
         }
 
-        // Draw particle (sparkling diamond/star or circle)
-        ctx.save();
-        ctx.globalAlpha = p.alpha;
-        ctx.fillStyle = p.color;
-        
-        // Dynamic glowing shadow
-        ctx.shadowBlur = p.size * 2;
-        ctx.shadowColor = p.color;
-
-        // Draw custom sparkle shape
-        ctx.beginPath();
-        const r = p.size;
-        ctx.moveTo(p.x, p.y - r);
-        ctx.quadraticCurveTo(p.x, p.y, p.x + r, p.y);
-        ctx.quadraticCurveTo(p.x, p.y, p.x, p.y + r);
-        ctx.quadraticCurveTo(p.x, p.y, p.x - r, p.y);
-        ctx.quadraticCurveTo(p.x, p.y, p.x, p.y - r);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
+        if (b.type === 'beam') drawBeam(b);
+        else if (b.type === 'star') drawStar(b);
+        else drawDot(b);
       }
 
-      // Sparkle ambient: Occasional rising golden flakes (reduced probability on mobile to protect CPU)
-      const ambientProb = isMobile ? 0.03 * config.particleDensity : 0.08 * config.particleDensity;
-      if (Math.random() < ambientProb) {
-        const angle = Math.random() * Math.PI * 2;
-        const radius = Math.random() * 180 + 10;
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        
-        particles.push({
-          id: particleIdCounter.current++,
-          x: centerX + Math.cos(angle) * radius,
-          y: centerY + Math.sin(angle) * radius,
-          vx: (Math.random() - 0.5) * 0.4,
-          vy: -Math.random() * 0.6 - 0.2, // upward drift
-          size: Math.random() * 3 + 1.5,
-          color: gradientColors[Math.floor(Math.random() * gradientColors.length)] || '#FFD700',
-          alpha: 1,
-          life: Math.floor(Math.random() * 40) + 30,
-          maxLife: 70
-        });
-      }
+      // Spawn ambient radiating beams and particles
+      const densityFactor = config.particleDensity;
+      if (Math.random() < 0.12 * densityFactor) spawnBeam();
+      if (Math.random() < 0.18 * densityFactor) spawnStar();
+      if (Math.random() < 0.25 * densityFactor) spawnDot();
 
       animId = requestAnimationFrame(updateParticles);
     };
 
     updateParticles();
-    return () => cancelAnimationFrame(animId);
+    return () => {
+      cancelAnimationFrame(animId);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, [gradientColors, config.particleDensity, isMobile]);
 
   // Handle Canvas Resize
@@ -361,9 +502,40 @@ export default function BaoxiangFlower({
   };
 
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (e.touches.length > 0) {
+    if (e.touches.length === 2) {
+      // Pinch-to-zoom: record initial distance
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      initialPinchDistance.current = Math.sqrt(dx * dx + dy * dy);
+      initialPinchScale.current = pinchScale;
+    } else if (e.touches.length === 1) {
       handleInteraction(e.touches[0].clientX, e.touches[0].clientY, true);
     }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 2 && initialPinchDistance.current > 0) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const scaleChange = distance / initialPinchDistance.current;
+      const newScale = Math.max(0.5, Math.min(3, initialPinchScale.current * scaleChange));
+      setPinchScale(newScale);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    // Reset pinch tracking
+    initialPinchDistance.current = 0;
+    // Smoothly return to normal scale
+    setTimeout(() => {
+      setPinchScale(1);
+    }, 200);
+  };
+
+  const handleDoubleClick = () => {
+    // Toggle zoom on double-click (desktop)
+    setPinchScale(prev => prev > 1 ? 1 : 2);
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -386,16 +558,19 @@ export default function BaoxiangFlower({
       className="relative w-full aspect-square max-w-[500px] mx-auto select-none overflow-hidden rounded-full flex items-center justify-center bg-radial from-[rgba(26,18,22,0.4)] to-transparent"
       onMouseMove={handleMouseMove}
       onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onDoubleClick={handleDoubleClick}
       onMouseDown={handleMouseDown}
-      style={{ cursor: 'pointer' }}
+      style={{ cursor: pinchScale > 1 ? 'zoom-out' : 'pointer' }}
     >
-      {/* Background radial soft light halo */}
-      <div 
+      {/* Background radial soft light halo with stronger breathing glow */}
+      <div
         className="absolute inset-0 transition-opacity duration-1000 ease-in-out pointer-events-none"
         style={{
-          background: `radial-gradient(circle, ${presetColors.backgroundAura}ee 0%, transparent 75%)`,
-          transform: `scale(${pulseScale})`,
-          opacity: config.renderingMode === 'gold-only' ? 0.15 : 0.85
+          background: `radial-gradient(circle at 50% 50%, ${presetColors.backgroundAura}dd 0%, ${presetColors.backgroundAura}44 35%, transparent 70%)`,
+          transform: `scale(${pulseScale * 1.15})`,
+          opacity: config.renderingMode === 'gold-only' ? 0.2 : 0.95,
         }}
       />
 
@@ -403,9 +578,9 @@ export default function BaoxiangFlower({
       <svg
         id="baoxiang-svg"
         viewBox="-250 -250 500 500"
-        className="w-11/12 h-11/12 overflow-visible pointer-events-none drop-shadow-2xl"
+        className="w-full h-full overflow-visible pointer-events-none drop-shadow-2xl"
         style={{
-          transform: `rotate(${rotationAngle}deg) scale(${pulseScale})`,
+          transform: `rotate(${rotationAngle}deg) scale(${pulseScale * pinchScale})`,
           transition: config.rotationSpeed === 0 ? 'transform 1s ease-out' : 'none',
         }}
       >
@@ -444,141 +619,57 @@ export default function BaoxiangFlower({
           </filter>
         </defs>
 
-        {/* ================= BACKGROUND DUNHUANG ZAOJING (敦煌藻井天穹) ================= */}
-        <g id="zaojing-ceiling" filter="url(#zen-glow)">
-          {/* 1. Outermost Square Enclosure of the Caisson Ceiling */}
-          <rect
-            x="-238"
-            y="-238"
-            width="476"
-            height="476"
-            fill="none"
-            stroke="url(#gold-line-grad)"
-            strokeWidth="1.8"
-            rx="16"
-            opacity="0.7"
-            className={config.isDrawing ? 'animate-draw' : ''}
-          />
-          <rect
-            x="-228"
-            y="-228"
-            width="456"
-            height="456"
-            fill="none"
-            stroke="url(#gold-line-grad)"
-            strokeWidth="0.8"
-            rx="12"
-            opacity="0.35"
-            strokeDasharray="6, 4"
-            className={config.isDrawing ? 'animate-draw' : ''}
-          />
-
-          {/* 2. Classical Corner Triangular Doupeng Brackets (垂角纹/斗拱) */}
-          <g opacity="0.5" className={config.isDrawing ? 'animate-draw' : ''}>
-            {/* Top-Left Corner */}
-            <path d="M -238 -180 L -180 -238" fill="none" stroke="url(#gold-line-grad)" strokeWidth="1" />
-            <path d="M -238 -150 L -150 -238" fill="none" stroke="url(#gold-line-grad)" strokeWidth="1.2" />
-            <path d="M -238 -120 L -120 -238" fill="none" stroke="url(#gold-line-grad)" strokeWidth="1" strokeDasharray="2, 2" />
-            <path d="M -238 -90 C -200 -90, -180 -110, -180 -150 C -180 -180, -150 -200, -150 -238" fill="none" stroke="url(#gold-line-grad)" strokeWidth="0.8" opacity="0.6" />
-            
-            {/* Top-Right Corner */}
-            <path d="M 238 -180 L 180 -238" fill="none" stroke="url(#gold-line-grad)" strokeWidth="1" />
-            <path d="M 238 -150 L 150 -238" fill="none" stroke="url(#gold-line-grad)" strokeWidth="1.2" />
-            <path d="M 238 -120 L 120 -238" fill="none" stroke="url(#gold-line-grad)" strokeWidth="1" strokeDasharray="2, 2" />
-            <path d="M 238 -90 C 200 -90, 180 -110, 180 -150 C 180 -180, 150 -200, 150 -238" fill="none" stroke="url(#gold-line-grad)" strokeWidth="0.8" opacity="0.6" />
-
-            {/* Bottom-Left Corner */}
-            <path d="M -238 180 L -180 238" fill="none" stroke="url(#gold-line-grad)" strokeWidth="1" />
-            <path d="M -238 150 L -150 238" fill="none" stroke="url(#gold-line-grad)" strokeWidth="1.2" />
-            <path d="M -238 120 L -120 238" fill="none" stroke="url(#gold-line-grad)" strokeWidth="1" strokeDasharray="2, 2" />
-            <path d="M -238 90 C -200 90, -180 110, -180 150 C -180 180, -150 200, -150 238" fill="none" stroke="url(#gold-line-grad)" strokeWidth="0.8" opacity="0.6" />
-
-            {/* Bottom-Right Corner */}
-            <path d="M 238 180 L 180 238" fill="none" stroke="url(#gold-line-grad)" strokeWidth="1" />
-            <path d="M 238 150 L 150 238" fill="none" stroke="url(#gold-line-grad)" strokeWidth="1.2" />
-            <path d="M 238 120 L 120 238" fill="none" stroke="url(#gold-line-grad)" strokeWidth="1" strokeDasharray="2, 2" />
-            <path d="M 238 90 C 200 90, 180 110, 180 150 C 180 180, 150 200, 150 238" fill="none" stroke="url(#gold-line-grad)" strokeWidth="0.8" opacity="0.6" />
-          </g>
-
-          {/* 3. Outer Slow Rotating Octagonal Star (八角井 - 顺时针) */}
-          <g className="animate-zaojing-cw" opacity="0.4">
-            <rect
-              x="-165"
-              y="-165"
-              width="330"
-              height="330"
-              fill="none"
-              stroke="url(#gold-line-grad)"
-              strokeWidth="1.2"
-              className={config.isDrawing ? 'animate-draw' : ''}
-            />
-            <rect
-              x="-165"
-              y="-165"
-              width="330"
-              height="330"
-              fill="none"
-              stroke="url(#gold-line-grad)"
-              strokeWidth="1.2"
-              transform="rotate(45)"
-              className={config.isDrawing ? 'animate-draw' : ''}
-            />
-          </g>
-
-          {/* 4. Inner Slow Rotating Octagonal Star (八角井 - 逆时针) */}
-          <g className="animate-zaojing-ccw" opacity="0.35">
-            <rect
-              x="-135"
-              y="-135"
-              width="270"
-              height="270"
-              fill="none"
-              stroke="url(#gold-line-grad)"
-              strokeWidth="0.8"
-              transform="rotate(22.5)"
-              className={config.isDrawing ? 'animate-draw' : ''}
-            />
-            <rect
-              x="-135"
-              y="-135"
-              width="270"
-              height="270"
-              fill="none"
-              stroke="url(#gold-line-grad)"
-              strokeWidth="0.8"
-              transform="rotate(67.5)"
-              className={config.isDrawing ? 'animate-draw' : ''}
-            />
-          </g>
-
-          {/* 5. Breathing Circular Celestial Rings (圆心天轮 - 呼吸韵律) */}
-          <g className="animate-zaojing-breathe">
+        {config.showDecorRing && (
+          <g id="decorative-ring-frame" opacity={config.renderingMode === 'gradient-only' ? 0.9 : 1}>
+            {/* Outer gold ring */}
             <circle
               r="215"
               fill="none"
               stroke="url(#gold-line-grad)"
-              strokeWidth="1.2"
-              strokeDasharray="4, 14"
+              strokeWidth={config.outlineWidth * 1.8}
+              opacity={0.9}
               className={config.isDrawing ? 'animate-draw' : ''}
             />
+            {/* Inner teal ring */}
             <circle
-              r="200"
+              r="180"
               fill="none"
-              stroke="url(#gold-line-grad)"
-              strokeWidth="0.8"
-              strokeDasharray="10, 8"
+              stroke={innerColor}
+              strokeWidth={config.outlineWidth * 1.2}
+              opacity={0.75}
               className={config.isDrawing ? 'animate-draw' : ''}
             />
-            <circle
-              r="185"
-              fill="none"
-              stroke="url(#gold-line-grad)"
-              strokeWidth="0.5"
-              strokeDasharray="1, 4"
-            />
+            {/* Dotted bead pattern between rings */}
+            {Array.from({ length: 24 }).map((_, i) => {
+              const angle = i * 15;
+              const beadRadius = 197;
+              return (
+                <circle
+                  key={`ring-bead-${i}`}
+                  cx={Math.cos((angle * Math.PI) / 180) * beadRadius}
+                  cy={Math.sin((angle * Math.PI) / 180) * beadRadius}
+                  r={2.2}
+                  fill={i % 2 === 0 ? goldStrokeColor : innerColor}
+                  opacity={0.85}
+                />
+              );
+            })}
+            {/* Subtle corner scroll motifs */}
+            {Array.from({ length: 8 }).map((_, i) => {
+              const angle = i * 45;
+              return (
+                <circle
+                  key={`ring-dot-${i}`}
+                  cx={Math.cos((angle * Math.PI) / 180) * 165}
+                  cy={Math.sin((angle * Math.PI) / 180) * 165}
+                  r={3.5}
+                  fill={goldStrokeColor}
+                  opacity={0.7}
+                />
+              );
+            })}
           </g>
-        </g>
-
+        )}
 
         {/* ================= LAYER 1: OUTER FLAME PETALS (火焰外瓣) ================= */}
         <g id="outer-petals">
@@ -829,7 +920,7 @@ export default function BaoxiangFlower({
         viewBox="-250 -250 500 500"
         className="absolute inset-0 w-11/12 h-11/12 m-auto overflow-visible pointer-events-none z-20"
         style={{
-          transform: `scale(${pulseScale})`,
+          transform: `scale(${pulseScale * pinchScale})`,
         }}
       >
         <defs>

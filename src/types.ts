@@ -1,4 +1,4 @@
-export type HistoricalPresetId = 'tang-gold' | 'dunhuang' | 'song-teal' | 'glazed-palace';
+export type HistoricalPresetId = 'tang-gold' | 'dunhuang' | 'song-teal' | 'glazed-palace' | 'ming-blue' | 'qing-rose' | 'tibetan-tangka' | 'japan-rinpa' | 'hua-shang-lotus';
 export type FlowerType = 'classic' | 'rounded' | 'lotus' | 'ruyi';
 
 export interface FlowerPreset {
@@ -29,7 +29,9 @@ export interface FlowerConfig {
   outlineWidth: number; // 1 to 5
   particleDensity: number; // 0 to 10
   chimeEnabled: boolean;
+  chimeVolume: number; // 0 to 100 (percentage)
   renderingMode: 'both' | 'gold-only' | 'gradient-only';
+  showDecorRing: boolean; // Toggles the decorative circular frame rings like the reference image
   customColors: {
     outer: string;
     inner: string;
@@ -49,4 +51,26 @@ export interface Particle {
   alpha: number;
   life: number;
   maxLife: number;
+}
+
+// 笺卡模板类型
+export type ScrollCardTemplateId = 'classic-scroll' | 'fan-shaped' | 'square-seal' | 'round-mirror' | 'bamboo-slip' | 'lotus-leaf';
+
+export interface ScrollCardTemplate {
+  id: ScrollCardTemplateId;
+  name: string;
+  description: string;
+  icon: string; // emoji
+  bgColor: string;
+  borderColor: string;
+  textColor: string;
+  accentColor: string;
+  paperStyle: 'parchment' | 'rice-paper' | 'silk' | 'bamboo' | 'gold-foil';
+}
+
+export interface ScrollCardData {
+  poem: string;
+  translation: string;
+  artist: string;
+  secondaryPoem?: string;
 }

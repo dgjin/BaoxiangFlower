@@ -64,6 +64,86 @@ export const HISTORICAL_PRESETS: FlowerPreset[] = [
     },
     gradientColors: ['#c1121f', '#ffb703', '#03045e', '#0077b6', '#f9a825'],
     soundScale: ['G3', 'A3', 'B3', 'D4', 'E4'] // Shang/Gong hybrid (庄重宏大)
+  },
+  {
+    id: 'ming-blue',
+    name: '明青花瓷',
+    era: '明代永乐宣德 (Ming Dynasty)',
+    description: '灵感源自永乐青花瓷。钴蓝白地、青翠欲滴，繁复缠枝莲纹与回纹环绕，既有伊斯兰几何之严谨，又蕴东方水墨之雅韵，清新脱俗。',
+    colors: {
+      bg: '#f5f0e8',
+      center: '#1e3a8a',
+      inner: '#3b82f6',
+      outer: '#1e40af',
+      backgroundAura: '#dbeafe',
+      goldLine: '#64748b'
+    },
+    gradientColors: ['#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'],
+    soundScale: ['C4', 'D4', 'E4', 'G4', 'A4']
+  },
+  {
+    id: 'qing-rose',
+    name: '清粉彩瓷',
+    era: '清代雍正乾隆 (Qing Dynasty)',
+    description: '源自雍正粉彩与珐琅彩瓷器。粉嫩柔和、胭脂水红、松石绿与明黄交织，层层晕染如花瓣初绽，尽显宫廷柔美富贵与精工细作。',
+    colors: {
+      bg: '#1c0f14',
+      center: '#db2777',
+      inner: '#f9a8d4',
+      outer: '#be185d',
+      backgroundAura: '#fce7f3',
+      goldLine: '#fbbf24'
+    },
+    gradientColors: ['#db2777', '#f9a8d4', '#f472b6', '#ec4899', '#fbbf24'],
+    soundScale: ['D4', 'E4', 'F4', 'A4', 'C5']
+  },
+  {
+    id: 'tibetan-tangka',
+    name: '藏密唐卡',
+    era: '藏传佛教 (Tibetan Thangka)',
+    description: '来自雪域高原的唐卡艺术。朱砂红、孔雀蓝、金粉与松石绿层层堆叠，色彩浓烈厚重，笔触庄严神圣，蕴含着密宗修行的深邃与光明。',
+    colors: {
+      bg: '#0d0d0d',
+      center: '#dc2626',
+      inner: '#0369a1',
+      outer: '#7c3aed',
+      backgroundAura: '#1e0a2e',
+      goldLine: '#fbbf24'
+    },
+    gradientColors: ['#dc2626', '#0369a1', '#7c3aed', '#f59e0b', '#fbbf24'],
+    soundScale: ['G3', 'B3', 'D4', 'E4', 'G4']
+  },
+  {
+    id: 'japan-rinpa',
+    name: '琳派金屏',
+    era: '江户琳派 (Rinpa School)',
+    description: '灵感源自尾形光琳与俵屋宗达的金屏风画派。金箔为底、绿青与群青交错，简约凝练的曲线中蕴含着日本独特的"间"之美与侘寂禅意。',
+    colors: {
+      bg: '#1a1208',
+      center: '#065f46',
+      inner: '#047857',
+      outer: '#1e40af',
+      backgroundAura: '#2c2416',
+      goldLine: '#f59e0b'
+    },
+    gradientColors: ['#065f46', '#047857', '#1e40af', '#f59e0b', '#fbbf24'],
+    soundScale: ['A3', 'C4', 'E4', 'G4', 'A4']
+  },
+  {
+    id: 'hua-shang-lotus',
+    name: '华裳莲纹',
+    era: '新中式纹样 (Neo-Chinese Pattern)',
+    description: '灵感源自现代中式品牌纹样。深海靛蓝为底，青绿莲花为主体，珊瑚橙与金线点缀，庄重典雅中透着灵动，适合文创包装与品牌视觉。',
+    colors: {
+      bg: '#0a1628',
+      center: '#f4a261',
+      inner: '#2a9d8f',
+      outer: '#1d4e89',
+      backgroundAura: '#142a45',
+      goldLine: '#e9c46a'
+    },
+    gradientColors: ['#1d4e89', '#2a9d8f', '#f4a261', '#e9c46a', '#ffffff'],
+    soundScale: ['C4', 'E4', 'G4', 'A4', 'C5']
   }
 ];
 
