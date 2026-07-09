@@ -110,7 +110,7 @@ function ClassicScrollCard({
   return (
     <div 
       onClick={onScrollClick}
-      className={`w-full rounded-2xl shadow-inner border-[6px] relative flex flex-col items-center overflow-hidden font-serif cursor-pointer select-none active:scale-[0.995] transition-all duration-150 ${
+      className={`w-full rounded-2xl shadow-inner border-[6px] relative flex flex-col items-center overflow-hidden font-zen cursor-pointer select-none active:scale-[0.995] transition-all duration-150 ${
         isMobile ? 'p-3.5' : 'p-6 sm:p-8'
       }`}
       style={{
@@ -178,7 +178,7 @@ function FanShapedCard({
   return (
     <div 
       onClick={onScrollClick}
-      className={`w-full rounded-2xl shadow-inner border-[4px] relative flex flex-col items-center overflow-hidden font-serif cursor-pointer select-none active:scale-[0.995] transition-all duration-150 ${
+      className={`w-full rounded-2xl shadow-inner border-[4px] relative flex flex-col items-center overflow-hidden font-zen cursor-pointer select-none active:scale-[0.995] transition-all duration-150 ${
         isMobile ? 'p-4' : 'p-6 sm:p-8'
       }`}
       style={{
@@ -202,7 +202,7 @@ function FanShapedCard({
             <span className="text-[9px] text-amber-800/50 mt-1">{currentPreset.name}</span>
           </div>
           <div className="flex-1 text-center">
-            <p className={`font-serif tracking-wider leading-relaxed text-amber-900/80 ${isMobile ? 'text-sm' : 'text-base'}`}>
+            <p className={`font-zen tracking-wider leading-relaxed text-amber-900/80 ${isMobile ? 'text-sm' : 'text-base'}`}>
               {poem}
             </p>
             <p className="text-[11px] text-amber-700/50 mt-2 italic">{translation}</p>
@@ -240,7 +240,7 @@ function SquareSealCard({
   return (
     <div 
       onClick={onScrollClick}
-      className={`w-full shadow-inner border-[5px] relative flex flex-col items-center overflow-hidden font-serif cursor-pointer select-none active:scale-[0.995] transition-all duration-150 ${
+      className={`w-full shadow-inner border-[5px] relative flex flex-col items-center overflow-hidden font-zen cursor-pointer select-none active:scale-[0.995] transition-all duration-150 ${
         isMobile ? 'p-4' : 'p-6'
       }`}
       style={{
@@ -256,7 +256,7 @@ function SquareSealCard({
         <MiniFlower config={config} currentPreset={currentPreset} isMobile={isMobile} size="small" />
         <div className="text-lg font-bold tracking-[0.2em] text-stone-800">{blessingTheme}</div>
         <div className="h-[1px] w-16 bg-stone-300/50" />
-        <p className={`text-center font-serif tracking-wide leading-relaxed text-stone-700/80 px-4 ${isMobile ? 'text-xs' : 'text-sm'}`}>
+        <p className={`text-center font-zen tracking-wide leading-relaxed text-stone-700/80 px-4 ${isMobile ? 'text-xs' : 'text-sm'}`}>
           {poem}
         </p>
         <div className="flex items-center gap-2 border border-stone-300/30 rounded px-4 py-1.5 bg-stone-100/30">
@@ -291,7 +291,7 @@ function RoundMirrorCard({
   return (
     <div 
       onClick={onScrollClick}
-      className={`w-full rounded-full shadow-inner border-[5px] relative flex flex-col items-center justify-center overflow-hidden font-serif cursor-pointer select-none active:scale-[0.995] transition-all duration-150 ${
+      className={`w-full rounded-full shadow-inner border-[5px] relative flex flex-col items-center justify-center overflow-hidden font-zen cursor-pointer select-none active:scale-[0.995] transition-all duration-150 ${
         isMobile ? 'p-5' : 'p-8'
       }`}
       style={{
@@ -311,7 +311,7 @@ function RoundMirrorCard({
         <MiniFlower config={config} currentPreset={currentPreset} isMobile={isMobile} size="small" />
         <div className="text-lg font-bold tracking-[0.2em] text-amber-900">{blessingTheme}</div>
         <div className="w-12 h-[1px] bg-amber-400/30" />
-        <p className={`font-serif tracking-wide leading-relaxed text-amber-800/80 px-6 ${isMobile ? 'text-xs' : 'text-sm'}`}>
+        <p className={`font-zen tracking-wide leading-relaxed text-amber-800/80 px-6 ${isMobile ? 'text-xs' : 'text-sm'}`}>
           {poem}
         </p>
         <div className="flex items-center gap-1.5 bg-amber-100/40 rounded-full px-4 py-1">
@@ -347,7 +347,7 @@ function BambooSlipCard({
   return (
     <div 
       onClick={onScrollClick}
-      className={`w-full rounded-lg shadow-inner border-[3px] relative flex flex-col items-center overflow-hidden font-serif cursor-pointer select-none active:scale-[0.995] transition-all duration-150 ${
+      className={`w-full rounded-lg shadow-inner border-[3px] relative flex flex-col items-center overflow-hidden font-zen cursor-pointer select-none active:scale-[0.995] transition-all duration-150 ${
         isMobile ? 'p-3' : 'p-5'
       }`}
       style={{
@@ -376,7 +376,7 @@ function BambooSlipCard({
           <MiniFlower config={config} currentPreset={currentPreset} isMobile={isMobile} size="tiny" />
           <div className="text-base font-bold tracking-[0.15em] text-olive-900">{blessingTheme}</div>
           <div className="w-10 h-[1px] bg-olive-500/30" />
-          <p className={`font-serif tracking-wide leading-relaxed text-center text-olive-800/80 px-2 ${isMobile ? 'text-[11px]' : 'text-sm'}`}>
+          <p className={`font-zen tracking-wide leading-relaxed text-center text-olive-800/80 px-2 ${isMobile ? 'text-[11px]' : 'text-sm'}`}>
             {poem}
           </p>
           <div className="flex items-center gap-1.5 border-b border-olive-500/20 pb-1">
@@ -412,7 +412,7 @@ function LotusLeafCard({
   return (
     <div 
       onClick={onScrollClick}
-      className={`w-full shadow-inner border-[4px] relative flex flex-col items-center overflow-hidden font-serif cursor-pointer select-none active:scale-[0.995] transition-all duration-150 ${
+      className={`w-full shadow-inner border-[4px] relative flex flex-col items-center overflow-hidden font-zen cursor-pointer select-none active:scale-[0.995] transition-all duration-150 ${
         isMobile ? 'p-4' : 'p-6 sm:p-8'
       }`}
       style={{
@@ -435,7 +435,7 @@ function LotusLeafCard({
         <div className="text-lg font-bold tracking-[0.15em] text-emerald-800">{blessingTheme}</div>
         <MiniFlower config={config} currentPreset={currentPreset} isMobile={isMobile} size="small" />
         <div className="w-16 h-[1px] bg-emerald-400/30" />
-        <p className={`font-serif tracking-wide leading-relaxed text-emerald-800/70 px-4 ${isMobile ? 'text-xs' : 'text-sm'}`}>
+        <p className={`font-zen tracking-wide leading-relaxed text-emerald-800/70 px-4 ${isMobile ? 'text-xs' : 'text-sm'}`}>
           {poem}
         </p>
         <div className="flex items-center gap-2 text-emerald-700/60">
@@ -575,7 +575,7 @@ export default function ScrollCardModal({
             />
 
             {/* 模板名称标签 */}
-            <div className="flex items-center gap-2 text-[#D4AF37]/80 text-xs font-serif tracking-wider">
+            <div className="flex items-center gap-2 text-[#D4AF37]/80 text-xs font-zen tracking-wider">
               <span>{template.icon}</span>
               <span>{template.name}</span>
               <span className="text-gray-500">·</span>
