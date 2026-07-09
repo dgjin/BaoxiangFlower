@@ -258,7 +258,7 @@ html, body {
 }
 
 .animate-draw {
-  animation: draw-lines 6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: draw-lines 20s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 /* Custom scrollbar to keep layout premium */

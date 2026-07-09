@@ -141,7 +141,7 @@ export default function App() {
       return;
     }
 
-    const duration = 6000; // Matches the setTimeout and draw-lines SVG keyframe animation
+    const duration = 20000; // Matches the setTimeout and draw-lines SVG keyframe animation
     const start = performance.now();
     let animId: number;
     let hasPlayedEndChime = false;
@@ -191,7 +191,7 @@ export default function App() {
     // Reset isDrawing state after animation completes
     const timer = setTimeout(() => {
       setConfig(prev => ({ ...prev, isDrawing: false }));
-    }, 6000);
+    }, 20000);
 
     return () => clearTimeout(timer);
   };
